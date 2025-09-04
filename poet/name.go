@@ -184,7 +184,8 @@ func newTwoParameterType(pkg, name string) func(TypeName, TypeName) TypeName {
 }
 
 var (
-	ListOf = newSingleParameterType("java.util", "List")
-	MapOf  = newTwoParameterType("java.util", "Map")
-	SetOf  = newSingleParameterType("java.util", "Set")
+	ListOf     = newSingleParameterType("java.util", "List")
+	MapOf      = newTwoParameterType("java.util", "Map")
+	SetOf      = newSingleParameterType("java.util", "Set")
+	OptionalOf = newSingleParameterType("java.util", "Optional")
 )
