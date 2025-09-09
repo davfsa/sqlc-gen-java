@@ -47,37 +47,6 @@ func NewGenericParam(name string, extends ...TypeName) TypeName {
 	}
 }
 
-func (t TypeName) Equals(other TypeName) bool {
-	if t.Package != other.Package ||
-		t.Name != other.Name ||
-		t.IsParameterized != other.IsParameterized ||
-		t.IsGeneric != other.IsGeneric ||
-		t.IsArray != other.IsArray {
-		return false
-	}
-
-	if len(t.Parameters) != len(other.Parameters) {
-		return false
-	}
-	for i := range t.Parameters {
-		if !t.Parameters[i].Equals(other.Parameters[i]) {
-			return false
-		}
-	}
-
-	if len(t.Extends) != len(other.Extends) {
-		return false
-	}
-	// TODO - is order actually important?
-	for i := range t.Extends {
-		if !t.Extends[i].Equals(other.Extends[i]) {
-			return false
-		}
-	}
-
-	return true
-}
-
 type FormatOption int
 
 var (
@@ -98,19 +67,17 @@ func (t TypeName) Format(ctx *Context, options ...FormatOption) string {
 
 	var bld strings.Builder
 
-	var typename string
 	if t.Package != "" {
 		// check if we need to use the fully qualified type name due to a collision
 		existing, ok := ctx.Types[t.Name]
-		if (ok && !t.Equals(existing)) || t.Name == ctx.CurrentTypeName {
+		if (ok && !(existing.Package == t.Package && existing.Name == t.Name)) || t.Name == ctx.CurrentTypeName {
 			bld.WriteString(t.Package)
 			bld.WriteString(".")
-			typename = t.Package + "." + t.Name
 		} else {
 			if !t.IsBuiltin {
-				ctx.Import(t.Package)
+				ctx.Import(t.Package + "." + t.Name)
+				ctx.Types[t.Name] = t
 			}
-			typename = t.Name
 		}
 	}
 
@@ -138,11 +105,6 @@ func (t TypeName) Format(ctx *Context, options ...FormatOption) string {
 	if !opts.has(ExcludeArrayBraces) && t.IsArray && !(t.IsGeneric && !opts.has(ExcludeConstraints)) {
 		bld.WriteString("[]")
 	}
-
-	// generic type names are not necessarily unique within a file
-	if !t.IsGeneric {
-		ctx.Types[typename] = t
-	} // ctx.GenericTypes = append(ctx.GenericTypes, t)
 
 	return bld.String()
 }

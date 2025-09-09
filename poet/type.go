@@ -90,13 +90,14 @@ func (c Class) Format(ctx *Context) string {
 	writeGenericParamList(ctx, &sb, c.GenericParameters, false)
 	sb.WriteString(" {\n")
 
-	for i, field := range c.Fields {
+	for _, field := range c.Fields {
 		sb.WriteString(ctx.indent(field.Format(ctx)))
-		sb.WriteString("\n")
+		sb.WriteString("\n\n")
+	}
 
-		if i == len(c.Fields)-1 {
-			sb.WriteString("\n")
-		}
+	for _, method := range c.Members {
+		sb.WriteString(ctx.indent(method.Format(ctx)))
+		sb.WriteString("\n\n")
 	}
 
 	if c.Constructor != nil {
@@ -165,7 +166,6 @@ func (c *ClassBuilder) WithMembers(members ...formattable) *ClassBuilder {
 }
 
 func (c *ClassBuilder) Build() Class {
-	c.class.Modifiers = maybeSetPackagePrivate(c.class.Modifiers)
 	return c.class
 }
 
@@ -274,7 +274,6 @@ func (b *EnumBuilder) WithMethods(methods ...Method) *EnumBuilder {
 }
 
 func (b *EnumBuilder) Build() Enum {
-	b.enum.Modifiers = maybeSetPackagePrivate(b.enum.Modifiers)
 	return b.enum
 }
 
@@ -364,6 +363,5 @@ func (b *RecordBuilder) WithMethods(methods ...Method) *RecordBuilder {
 }
 
 func (b *RecordBuilder) Build() Record {
-	b.record.Modifiers = maybeSetPackagePrivate(b.record.Modifiers)
 	return b.record
 }

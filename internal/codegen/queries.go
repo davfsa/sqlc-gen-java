@@ -250,7 +250,7 @@ func BuildQueriesFile(engine string, config core.Config, queryFilename string, q
 			return "", []byte{}, errors.New("copyFrom is not currently supported")
 		}
 
-		methodBuilder = poet.NewMethodBuilder(q.MethodName, returnType).WithThrows(sqlExceptionClass)
+		methodBuilder = poet.NewMethodBuilder(q.MethodName, returnType).WithModifiers(poet.ModifierPublic).WithThrows(sqlExceptionClass)
 		codeBuilder := poet.NewCodeBuilder()
 
 		if q.Command == core.ExecResult {
