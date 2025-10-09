@@ -4,14 +4,15 @@ import (
 	"strings"
 )
 
-// TODO - annotation support
-
 type TypeName struct {
 	Package string
 	Name    string
 
 	IsBuiltin bool
 	IsArray   bool
+
+	// FIXME: We need builders for this
+	Annotations []Annotation
 
 	IsParameterized bool
 	Parameters      []TypeName
@@ -20,8 +21,8 @@ type TypeName struct {
 	Extends   []TypeName
 }
 
-func NewClassName(pkg, name string) TypeName {
-	return TypeName{Package: pkg, Name: name}
+func NewClassName(pkg, name string, annotations ...Annotation) TypeName {
+	return TypeName{Package: pkg, Name: name, Annotations: annotations}
 }
 
 func (t TypeName) Array() TypeName {
@@ -79,6 +80,11 @@ func (t TypeName) Format(ctx *Context, options ...FormatOption) string {
 				ctx.Types[t.Name] = t
 			}
 		}
+	}
+
+	for _, annotation := range t.Annotations {
+		bld.WriteString(annotation.Format(ctx))
+		bld.WriteString(" ")
 	}
 
 	bld.WriteString(t.Name)
